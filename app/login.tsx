@@ -1,5 +1,6 @@
 import { login } from "@/Api/auth.api";
 import { setAuthToken } from "@/axios/axiosInstance";
+import { RootStackParamList } from "@/Types/rootStackParams";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { Formik } from "formik";
@@ -7,10 +8,7 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, Card, Text, TextInput } from "react-native-paper";
 import * as yup from "yup";
-type RootStackParamList = {
-  Login: undefined;
-  Profile: undefined;
-};
+
 type LoginScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   "Login"
@@ -46,7 +44,7 @@ export default function Login() {
         <Card.Content>
           <Text style={styles.title}>Login</Text>
           <Formik
-            initialValues={{ agentId: "", password: "" }}
+            initialValues={{ agentId: "abcdea", password: "123456" }}
             validationSchema={loginSchema}
             onSubmit={handleSubmit}
           >

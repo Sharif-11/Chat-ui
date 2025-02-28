@@ -1,21 +1,11 @@
 import { createAgent } from "@/Api/auth.api";
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
 import { Formik } from "formik";
 import React from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { Button, Text, TextInput } from "react-native-paper";
 import * as yup from "yup";
 
 // Define navigation types
-type RootStackParamList = {
-  Profile: undefined;
-  CreateAgent: undefined;
-};
-type CreateAgentScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  "CreateAgent"
->;
 
 // Define validation schema
 const agentSchema = yup.object({
@@ -31,9 +21,7 @@ const agentSchema = yup.object({
     .min(6, "Minimum 6 characters"),
 });
 
-const CreateAgentScreen: React.FC = () => {
-  const navigation = useNavigation<CreateAgentScreenNavigationProp>(); // ✅ Navigation hook
-
+export default function Agents() {
   const handleCreateAgent = async (values: {
     agentId: string;
     name: string;
@@ -44,11 +32,14 @@ const CreateAgentScreen: React.FC = () => {
         userId: values.agentId,
         name: values.name,
         password: values.password,
-      }); // ✅ API Call (Adjust endpoint)
-      Alert.alert("Success", "Agent created successfully!");
-      navigation.navigate("Profile"); // ✅ Navigate back to Profile after creation
+      });
+      if (success) {
+        alert("Agent created successfully");
+      } else {
+        alert(message);
+      }
     } catch (error) {
-      Alert.alert("Error", "An error occurred. Please try again later.");
+      alert("An error occurred. Please try again later.");
     }
   };
 
@@ -108,11 +99,7 @@ const CreateAgentScreen: React.FC = () => {
               Create Agent
             </Button>
 
-            <Button
-              mode="text"
-              onPress={() => navigation.goBack()}
-              style={styles.backButton}
-            >
+            <Button mode="text" style={styles.backButton}>
               Back to Profile
             </Button>
           </>
@@ -120,7 +107,7 @@ const CreateAgentScreen: React.FC = () => {
       </Formik>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -152,5 +139,3 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 });
-
-export default CreateAgentScreen;
