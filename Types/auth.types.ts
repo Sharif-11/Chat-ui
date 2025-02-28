@@ -23,3 +23,12 @@ interface CreateAgentResponse {
   message: string;
   data?: string;
 }
+interface Agent {
+  userId: string;
+  name: string;
+}
+interface GetAgentsResponse {
+  success: boolean;
+  message: string;
+  data?: Agent[];
+}

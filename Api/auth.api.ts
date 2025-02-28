@@ -42,3 +42,15 @@ export const createAgent = async (
     }
   }
 };
+export const getAllAgents = async (): Promise<GetAgentsResponse> => {
+  try {
+    const response = await api.get<GetAgentsResponse>("/agents");
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      throw error;
+    } else {
+      throw new Error("An error occurred. Please try again later.");
+    }
+  }
+};
