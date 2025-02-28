@@ -2,7 +2,8 @@ import { checkLogin } from "@/Api/auth.api";
 import { setAuthToken } from "@/axios/axiosInstance";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "expo-router";
-import React, {
+import * as React from "react";
+import {
   createContext,
   ReactNode,
   useContext,
