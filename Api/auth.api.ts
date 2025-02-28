@@ -18,7 +18,7 @@ export const login = async (data: LoginRequest): Promise<LoginResponse> => {
 
 export const checkLogin = async (): Promise<LoginResponse> => {
   try {
-    const response = await api.get<LoginResponse>("/login");
+    const response = await api.get<LoginResponse>("/check-login");
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError) {

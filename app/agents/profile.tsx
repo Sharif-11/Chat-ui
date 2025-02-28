@@ -1,46 +1,10 @@
-import { checkLogin } from "@/Api/auth.api";
-import React, { useEffect, useState } from "react";
+import { useAuth } from "@/Contexts/authContext";
+import React from "react";
 import { StyleSheet, View } from "react-native";
-import {
-  ActivityIndicator,
-  Avatar,
-  Button,
-  Card,
-  Text,
-} from "react-native-paper";
+import { Avatar, Button, Card, Text } from "react-native-paper";
 
 export default function ProfileScreen() {
-  const [user, setUser] = useState<User | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchUserProfile();
-  }, []);
-
-  const fetchUserProfile = async () => {
-    try {
-      const { success, message, data } = await checkLogin();
-      alert(success);
-      if (success) {
-        setUser(data!);
-      } else {
-        setError(message);
-      }
-    } catch (error) {
-      setError("An error occurred. Please try again later.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <View style={styles.loaderContainer}>
-        <ActivityIndicator animating size="large" />
-      </View>
-    );
-  }
+  const { user } = useAuth();
 
   return (
     <View style={styles.container}>
@@ -63,7 +27,7 @@ export default function ProfileScreen() {
         style={styles.button}
         onPress={() => console.log("Edit Profile")}
       >
-        Edit Profile
+        Logout
       </Button>
     </View>
   );
@@ -91,6 +55,9 @@ const styles = StyleSheet.create({
   },
   avatarContainer: {
     marginBottom: 20,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
   avatar: {
     backgroundColor: "#6200ea",

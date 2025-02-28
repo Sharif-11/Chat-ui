@@ -8,7 +8,11 @@ export default function RootLayout() {
         screenOptions={{
           headerShown: false,
         }}
-      ></Stack>
+      >
+        <Stack.Screen name="agents" options={{ headerShown: false }} />
+        <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="+not-found" />
+      </Stack>
     </AuthProvider>
   );
 }
