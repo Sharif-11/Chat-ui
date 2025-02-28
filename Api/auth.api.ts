@@ -15,3 +15,30 @@ export const login = async (data: LoginRequest): Promise<LoginResponse> => {
     }
   }
 };
+
+export const checkLogin = async (): Promise<LoginResponse> => {
+  try {
+    const response = await api.get<LoginResponse>("/login");
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      throw error;
+    } else {
+      throw new Error("An error occurred. Please try again later.");
+    }
+  }
+};
+export const createAgent = async (
+  data: CreateAgentRequest
+): Promise<CreateAgentResponse> => {
+  try {
+    const response = await api.post<CreateAgentResponse>("/agents", data);
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      throw error;
+    } else {
+      throw new Error("An error occurred. Please try again later.");
+    }
+  }
+};

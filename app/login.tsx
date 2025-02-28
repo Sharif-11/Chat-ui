@@ -1,11 +1,20 @@
 import { login } from "@/Api/auth.api";
 import { setAuthToken } from "@/axios/axiosInstance";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
 import { Formik } from "formik";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, Card, Text, TextInput } from "react-native-paper";
 import * as yup from "yup";
-
+type RootStackParamList = {
+  Login: undefined;
+  Profile: undefined;
+};
+type LoginScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "Login"
+>;
 const loginSchema = yup.object({
   agentId: yup
     .string()
@@ -18,18 +27,14 @@ const loginSchema = yup.object({
 });
 
 export default function Login() {
+  const navigation = useNavigation<LoginScreenNavigationProp>();
   const handleSubmit = async (values: LoginRequest) => {
     try {
       const { success, message, data } = await login(values);
       if (success) {
-        setAuthToken(data.token);
-        alert("Login successful");
-        if (data.role === "admin") {
-          // navigate to admin dashboard
-        }
-        if (data.role === "agent") {
-          // navigate to user dashboard
-        }
+        setAuthToken(data!.token);
+        // navigate to profile screen
+        navigation.navigate("Profile");
       } else {
         // handle error
       }
