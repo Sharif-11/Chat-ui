@@ -1,38 +1,38 @@
+import { baseURL } from "@/axios/axiosInstance";
+import { useAuth } from "@/Contexts/authContext";
 import React, { useEffect, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import { ActivityIndicator, Button, Card, Text } from "react-native-paper";
-import { Socket } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 
 const AgentWaitingScreen: React.FC = () => {
+  const { user } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [chatRequests, setChatRequests] = useState<{ userId: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Connect to the Socket.io server
-    // const newSocket = io(baseURL);
-    // setSocket(newSocket);
+    const newSocket = io(baseURL);
+    setSocket(newSocket);
     // // Notify server that agent has joined
-    // newSocket.emit("agent_join", { userId: user.userId });
+    newSocket.emit("agent_join", { userId: user?.userId });
     // // Listen for new chat requests
-    // newSocket.on("notify_agents", (data) => {
-    //   Alert.alert("New Chat Request", data.message);
-    //   setChatRequests((prevRequests) => [
-    //     ...prevRequests,
-    //     { userId: data.message.split(" ")[1] },
-    //   ]);
-    // });
+    newSocket.on("notify_agents", (data) => {
+      alert("New Chat Request");
+      setChatRequests((prevRequests) => [
+        ...prevRequests,
+        { userId: data.message.split(" ")[1] },
+      ]);
+    });
     // // Handle chat assignment
-    // newSocket.on("chat_assigned", ({ userId }) => {
-    //   Alert.alert(
-    //     "Chat Assigned",
-    //     `Chat with user ${userId} has been assigned.`
-    //   );
-    // });
-    // setLoading(false);
-    // return () => {
-    //   newSocket.disconnect();
-    // };
+    newSocket.on("chat_assigned", ({ userId }) => {
+      alert(`Chat with user ${userId} has been assigned.`);
+    });
+    setLoading(false);
+    return () => {
+      newSocket.disconnect();
+    };
   }, []);
 
   const handleAcceptChat = (userId: string) => {

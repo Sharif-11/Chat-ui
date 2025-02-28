@@ -1,5 +1,6 @@
 import { login } from "@/Api/auth.api";
 import { setAuthToken } from "@/axios/axiosInstance";
+import { useAuth } from "@/Contexts/authContext";
 import { RootStackParamList } from "@/Types/rootStackParams";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
@@ -7,7 +8,13 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { Formik } from "formik";
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { Button, Card, Text, TextInput } from "react-native-paper";
+import {
+  ActivityIndicator,
+  Button,
+  Card,
+  Text,
+  TextInput,
+} from "react-native-paper";
 import * as yup from "yup";
 
 type LoginScreenNavigationProp = StackNavigationProp<
@@ -27,6 +34,7 @@ const loginSchema = yup.object({
 
 export default function Login() {
   const navigation = useNavigation<LoginScreenNavigationProp>();
+  const { loading } = useAuth();
   const handleSubmit = async (values: LoginRequest) => {
     try {
       const { success, message, data } = await login(values);
@@ -40,6 +48,13 @@ export default function Login() {
       }
     } catch (error) {}
   };
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
       <Card style={styles.card}>

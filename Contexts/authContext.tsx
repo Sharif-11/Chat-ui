@@ -9,37 +9,31 @@ import React, {
   useEffect,
   useState,
 } from "react";
+import { StyleSheet } from "react-native";
 
-// Define user type
-
-// Define auth context type
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-
-  //   logout: () => Promise<void>;
 }
 
-// Create AuthContext with default values
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Define props type for provider
 interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Auth Provider Component
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigation = useNavigation();
+
   useEffect(() => {
     const loadUser = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
         if (token) {
           setAuthToken(token);
-          const { success, message, data } = await checkLogin();
+          const { success, data } = await checkLogin();
           if (success) {
             setUser(data!);
             (navigation as any).navigate("agents");
@@ -53,16 +47,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     loadUser();
-  }, []);
-
-  // Function to log in a user
-
-  // Function to log out a user
-  //   const logout = async () => {
-  //     await AsyncStorage.removeItem("authToken");
-  //     setAuthToken(null);
-  //     setUser(null);
-  //   };
+  }, [children]);
 
   return (
     <AuthContext.Provider value={{ user, loading }}>
@@ -71,7 +56,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   );
 };
 
-// Custom hook to use Auth Context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -79,3 +63,12 @@ export const useAuth = () => {
   }
   return context;
 };
+
+const styles = StyleSheet.create({
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f4f4f4",
+  },
+});
