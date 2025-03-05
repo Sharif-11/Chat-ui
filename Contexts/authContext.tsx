@@ -83,15 +83,16 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const loadUser = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
+
         if (token) {
           setAuthToken(token);
           const { success, data } = await checkLogin();
           if (success && data) {
             setUser(data);
             if (data.role === "agent") {
-              (navigation as any).navigate("(agent)");
+              (navigation as any).navigate("agents");
             } else {
-              (navigation as any).navigate("(admin)");
+              (navigation as any).navigate("admin");
             }
           } else {
             navigation.dispatch(
