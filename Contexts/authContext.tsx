@@ -1,75 +1,120 @@
 import { checkLogin } from "@/Api/auth.api";
 import { setAuthToken } from "@/axios/axiosInstance";
+import { socketURL } from "@/axios/urls";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "expo-router";
-import * as React from "react";
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
-import { StyleSheet } from "react-native";
+
+import { createContext, useContext, useEffect, useState } from "react";
+import { io, Socket } from "socket.io-client";
+
+// ... (other imports remain same)
 
 interface AuthContextType {
   user: User | null;
+  socket: Socket | null;
   loading: boolean;
+  setUser: (user: User | null) => void;
+  setSocket: (socket: Socket | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
 interface AuthProviderProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigation = useNavigation();
 
+  // Initialize socket when user is authenticated
+  useEffect(() => {
+    let newSocket: Socket;
+
+    const initializeSocket = async () => {
+      if (user && user.role === "agent") {
+        try {
+          newSocket = io(socketURL, {
+            query: { ...user },
+            transports: ["websocket"],
+          });
+
+          newSocket.on("connect", () => {
+            console.log("Socket connected");
+            newSocket.emit("agent_join", { userId: user.userId });
+          });
+
+          newSocket.on("disconnect", () => {
+            console.log("Socket disconnected");
+          });
+
+          newSocket.on("notify_agents", (data) => {
+            // Handle incoming chat request notification
+            console.log("New chat request:", data);
+          });
+
+          setSocket(newSocket);
+        } catch (error) {
+          console.error("Socket connection error:", error);
+        }
+      }
+      if (!user) {
+        if (newSocket) {
+          newSocket.disconnect();
+          setSocket(null);
+        }
+      }
+    };
+
+    initializeSocket();
+
+    return () => {
+      if (newSocket) {
+        newSocket.disconnect();
+      }
+    };
+  }, [user]);
+
+  // Load user on mount
   useEffect(() => {
     const loadUser = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
         if (token) {
-          setAuthToken(token);
+          setAuthToken();
           const { success, data } = await checkLogin();
-          if (success) {
-            setUser(data!);
-            (navigation as any).navigate("agents");
+          if (success && data) {
+            setUser(data);
+            if (data.role === "agent") {
+              (navigation as any).navigate("(agent)");
+            } else {
+              (navigation as any).navigate("(admin)");
+            }
           }
         }
-      } catch {
-        setLoading(false);
+      } catch (error) {
+        console.error("Auth error:", error);
       } finally {
         setLoading(false);
       }
     };
 
     loadUser();
-  }, [children]);
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, setUser, socket, setSocket }}>
       {children}
     </AuthContext.Provider>
   );
 };
-
-export const useAuth = () => {
+const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error("useAuth must be used within AuthProvider");
   }
   return context;
 };
-
-const styles = StyleSheet.create({
-  loaderContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f4f4f4",
-  },
-});
+export { AuthProvider, useAuth };

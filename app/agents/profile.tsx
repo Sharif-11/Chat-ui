@@ -1,10 +1,35 @@
+import { logout } from "@/Api/auth.api";
 import { useAuth } from "@/Contexts/authContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StackActions, useNavigation } from "@react-navigation/native";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Avatar, Button, Card, Text } from "react-native-paper";
 
 export default function ProfileScreen() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
+  const navigation = useNavigation();
+  const handleLogout = async () => {
+    try {
+      const { success, message } = await logout();
+      if (success) {
+        AsyncStorage.removeItem("token")
+          .then(() => {
+            setUser(null);
+            navigation.dispatch(
+              StackActions.replace("index") // Replace with your login route name
+            );
+          })
+          .catch((error) => {
+            console.error("Error removing token:", error);
+          });
+      } else {
+        console.error("Logout error:", message);
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -22,11 +47,7 @@ export default function ProfileScreen() {
         </Card.Content>
       </Card>
 
-      <Button
-        mode="contained"
-        style={styles.button}
-        onPress={() => console.log("Edit Profile")}
-      >
+      <Button mode="contained" style={styles.button} onPress={handleLogout}>
         Logout
       </Button>
     </View>

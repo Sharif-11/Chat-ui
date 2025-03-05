@@ -32,3 +32,7 @@ interface GetAgentsResponse {
   message: string;
   data?: Agent[];
 }
+interface LogoutResponse {
+  success: boolean;
+  message: string;
+}

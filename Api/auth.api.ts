@@ -54,3 +54,15 @@ export const getAllAgents = async (): Promise<GetAgentsResponse> => {
     }
   }
 };
+export const logout = async (): Promise<LogoutResponse> => {
+  try {
+    const response = await api.post<LogoutResponse>("/logout");
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      throw error;
+    } else {
+      throw new Error("An error occurred. Please try again later.");
+    }
+  }
+};
