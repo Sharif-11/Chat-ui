@@ -34,7 +34,7 @@ const loginSchema = yup.object({
 
 export default function Login() {
   const navigation = useNavigation<LoginScreenNavigationProp>();
-  const { loading, setUser } = useAuth();
+  const { loading, setUser, user } = useAuth();
 
   const handleSubmit = async (values: LoginRequest) => {
     try {
@@ -56,6 +56,7 @@ export default function Login() {
       </View>
     );
   }
+
   return (
     <View style={styles.container}>
       <Card style={styles.card}>

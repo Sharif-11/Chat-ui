@@ -7,6 +7,8 @@ import { StackActions } from "@react-navigation/native";
 import { useNavigation } from "expo-router";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { ActivityIndicator } from "react-native-paper";
 import { io, Socket } from "socket.io-client";
 
 // ... (other imports remain same)
@@ -35,7 +37,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     let newSocket: Socket;
 
     const initializeSocket = async () => {
-      if (user && user.role === "agent") {
+      if (user) {
         try {
           newSocket = io(socketURL, {
             query: { ...user },
@@ -57,6 +59,9 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           });
 
           setSocket(newSocket);
+          navigation.dispatch(
+            StackActions.replace("agents") // Replace with your login route name
+          );
         } catch (error) {
           console.error("Socket connection error:", error);
         }
@@ -83,26 +88,12 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const loadUser = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
-
         if (token) {
           setAuthToken(token);
           const { success, data } = await checkLogin();
           if (success && data) {
             setUser(data);
-            if (data.role === "agent") {
-              (navigation as any).navigate("agents");
-            } else {
-              (navigation as any).navigate("admin");
-            }
-          } else {
-            navigation.dispatch(
-              StackActions.replace("index") // Replace with your login route name
-            );
           }
-        } else {
-          navigation.dispatch(
-            StackActions.replace("index") // Replace with your login route name
-          );
         }
       } catch (error) {
         console.error("Auth error:", error);
@@ -113,7 +104,13 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     loadUser();
   }, []);
-
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
   return (
     <AuthContext.Provider value={{ user, loading, setUser, socket, setSocket }}>
       {children}
@@ -128,3 +125,11 @@ const useAuth = () => {
   return context;
 };
 export { AuthProvider, useAuth };
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f4f4f4",
+  },
+});

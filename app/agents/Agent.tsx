@@ -148,7 +148,7 @@ export default function Agents() {
                   )}
                   <Button
                     mode="contained"
-                    onPress={handleSubmit}
+                    onPress={() => handleSubmit()}
                     loading={submitting}
                     disabled={submitting}
                     style={styles.button}
