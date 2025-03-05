@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
 // Create an Axios instance with a base URL
@@ -11,10 +10,8 @@ const api = axios.create({
 });
 
 // Function to set Authorization header after login
-export const setAuthToken = async () => {
+export const setAuthToken = async (token: string | null) => {
   try {
-    const token = await AsyncStorage.getItem("token");
-
     if (token) {
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     } else {
@@ -24,6 +21,13 @@ export const setAuthToken = async () => {
   } catch (error) {
     console.error("Error retrieving token from storage:", error);
     delete api.defaults.headers.common["Authorization"];
+  }
+};
+export const removeAuthToken = async () => {
+  try {
+    delete api.defaults.headers.common["Authorization"];
+  } catch (error) {
+    console.error("Error removing token from storage:", error);
   }
 };
 

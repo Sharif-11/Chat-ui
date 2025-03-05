@@ -1,4 +1,5 @@
 import { logout } from "@/Api/auth.api";
+import { removeAuthToken } from "@/axios/axiosInstance";
 import { useAuth } from "@/Contexts/authContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StackActions, useNavigation } from "@react-navigation/native";
@@ -13,16 +14,12 @@ export default function ProfileScreen() {
     try {
       const { success, message } = await logout();
       if (success) {
-        AsyncStorage.removeItem("token")
-          .then(() => {
-            setUser(null);
-            navigation.dispatch(
-              StackActions.replace("index") // Replace with your login route name
-            );
-          })
-          .catch((error) => {
-            console.error("Error removing token:", error);
-          });
+        setUser(null);
+        await AsyncStorage.removeItem("token");
+        removeAuthToken();
+        navigation.dispatch(
+          StackActions.replace("index") // Replace with your login route name
+        );
       } else {
         console.error("Logout error:", message);
       }

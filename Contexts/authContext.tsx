@@ -3,6 +3,7 @@ import { setAuthToken } from "@/axios/axiosInstance";
 import { socketURL } from "@/axios/urls";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StackActions } from "@react-navigation/native";
 import { useNavigation } from "expo-router";
 
 import { createContext, useContext, useEffect, useState } from "react";
@@ -83,7 +84,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const token = await AsyncStorage.getItem("token");
         if (token) {
-          setAuthToken();
+          setAuthToken(token);
           const { success, data } = await checkLogin();
           if (success && data) {
             setUser(data);
@@ -92,7 +93,15 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             } else {
               (navigation as any).navigate("(admin)");
             }
+          } else {
+            navigation.dispatch(
+              StackActions.replace("index") // Replace with your login route name
+            );
           }
+        } else {
+          navigation.dispatch(
+            StackActions.replace("index") // Replace with your login route name
+          );
         }
       } catch (error) {
         console.error("Auth error:", error);

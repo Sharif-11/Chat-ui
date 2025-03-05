@@ -1,4 +1,5 @@
 import { login } from "@/Api/auth.api";
+import { setAuthToken } from "@/axios/axiosInstance";
 import { useAuth } from "@/Contexts/authContext";
 import { RootStackParamList } from "@/Types/rootStackParams";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -39,10 +40,10 @@ export default function Login() {
     try {
       const { success, data } = await login(values);
       if (success) {
-        AsyncStorage.setItem("token", data!.token).then(() => {
-          setUser(data!);
-          navigation.navigate("agents");
-        });
+        await AsyncStorage.setItem("token", data!.token);
+        setAuthToken(data!.token);
+        setUser(data!);
+        navigation.navigate("agents");
       } else {
         // handle error
       }
