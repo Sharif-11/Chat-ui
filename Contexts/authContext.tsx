@@ -94,6 +94,10 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           if (success && data) {
             setUser(data);
           }
+        } else {
+          navigation.dispatch(
+            StackActions.replace("index") // Replace with your login route name
+          );
         }
       } catch (error) {
         console.error("Auth error:", error);

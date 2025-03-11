@@ -2,12 +2,12 @@ import { logout } from "@/Api/auth.api";
 import { removeAuthToken } from "@/axios/axiosInstance";
 import { useAuth } from "@/Contexts/authContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { StackActions, useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Avatar, Button, Card, Text } from "react-native-paper";
 
-export default function ProfileScreen() {
+export default function Profile() {
   const { user, setUser } = useAuth();
   const navigation = useNavigation();
   const handleLogout = async () => {
@@ -17,9 +17,7 @@ export default function ProfileScreen() {
         setUser(null);
         await AsyncStorage.removeItem("token");
         removeAuthToken();
-        navigation.dispatch(
-          StackActions.replace("index") // Replace with your login route name
-        );
+        navigation.navigate("Login");
       } else {
         console.error("Logout error:", message);
       }

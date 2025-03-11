@@ -3,7 +3,7 @@ interface LoginRequest {
   password: string;
 }
 interface User {
-  role: string;
+  role: "agent" | "admin";
   userId: string;
   name: string;
   token: string;
