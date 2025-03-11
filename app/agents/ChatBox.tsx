@@ -1,8 +1,10 @@
 import { logout } from "@/Api/auth.api";
 import { baseURL, removeAuthToken } from "@/axios/axiosInstance";
 import { useAuth } from "@/Contexts/authContext";
+import { RootStackParamList } from "@/Types/rootStackParams";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useEffect, useState } from "react";
 import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 import {
@@ -28,7 +30,7 @@ const ChatList: React.FC = () => {
   >([]);
   const [loading, setLoading] = useState(true);
   const [menuVisible, setMenuVisible] = useState(false); // For three-dot menu
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   // Dummy data for debugging
   const dummyChatRequests = [

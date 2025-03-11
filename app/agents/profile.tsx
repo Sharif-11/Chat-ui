@@ -1,15 +1,17 @@
 import { logout } from "@/Api/auth.api";
 import { removeAuthToken } from "@/axios/axiosInstance";
 import { useAuth } from "@/Contexts/authContext";
+import { RootStackParamList } from "@/Types/rootStackParams";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Avatar, Button, Card, Text } from "react-native-paper";
 
 export default function Profile() {
   const { user, setUser } = useAuth();
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const handleLogout = async () => {
     try {
       const { success, message } = await logout();

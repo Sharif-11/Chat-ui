@@ -1,5 +1,6 @@
 export type RootStackParamList = {
   Login: undefined;
   Profile: undefined;
-  agents: undefined;
+  AgentList: undefined;
+  ChatList: undefined;
 };
