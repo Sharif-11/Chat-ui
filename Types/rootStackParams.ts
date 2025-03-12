@@ -3,4 +3,7 @@ export type RootStackParamList = {
   Profile: undefined;
   AgentList: undefined;
   ChatList: undefined;
+  ChatBox: {
+    userId: string;
+  };
 };

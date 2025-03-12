@@ -2,9 +2,10 @@ import { checkLogin } from "@/Api/auth.api";
 import { setAuthToken } from "@/axios/axiosInstance";
 import { socketURL } from "@/axios/urls";
 import { RootStackParamList } from "@/Types/rootStackParams";
+import { NewChatRequest } from "@/Types/utils.types";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { StackActions, useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 
 import { createContext, useContext, useEffect, useState } from "react";
@@ -20,6 +21,8 @@ interface AuthContextType {
   loading: boolean;
   setUser: (user: User | null) => void;
   setSocket: (socket: Socket | null) => void;
+  newChatRequests: NewChatRequest[];
+  setNewChatRequests: (newChatRequests: NewChatRequest[]) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,6 +34,21 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [newChatRequests, setNewChatRequests] = useState<
+    {
+      userId: string;
+      userName: string;
+    }[]
+  >([
+    {
+      userId: "1",
+      userName: "Kawsar",
+    },
+    {
+      userId: "2",
+      userName: "Ruhan",
+    },
+  ]);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   // Initialize socket when user is authenticated
@@ -60,9 +78,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           });
 
           setSocket(newSocket);
-          navigation.dispatch(
-            StackActions.replace("agents") // Replace with your login route name
-          );
         } catch (error) {
           console.error("Socket connection error:", error);
         }
@@ -94,10 +109,10 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const { success, data } = await checkLogin();
           if (success && data) {
             setUser(data);
-            navigation.navigate("ChatList");
+            // navigation.navigate("ChatList");
           }
         } else {
-          navigation.navigate("Login");
+          // navigation.navigate("Login");
         }
       } catch (error) {
         console.error("Auth error:", error);
@@ -119,7 +134,17 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     );
   }
   return (
-    <AuthContext.Provider value={{ user, loading, setUser, socket, setSocket }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        setUser,
+        socket,
+        setSocket,
+        newChatRequests,
+        setNewChatRequests,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
