@@ -6,7 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { Formik } from "formik";
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import {
   ActivityIndicator,
@@ -34,21 +34,31 @@ const loginSchema = yup.object({
 
 export default function Login() {
   const navigation = useNavigation<LoginScreenNavigationProp>();
+  const [logging, setLogging] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { loading, setUser, user } = useAuth();
 
   const handleSubmit = async (values: LoginRequest) => {
     try {
-      const { success, data } = await login(values);
+      setLogging(true);
+      setErrorMessage(null);
+      const { success, data, message } = await login(values);
+
       if (success) {
         await AsyncStorage.setItem("token", data!.token);
         setAuthToken(data!.token);
         setUser(data!);
-        navigation.navigate("agents");
+        navigation.navigate("ChatList");
       } else {
-        // handle error
+        setErrorMessage(message);
       }
-    } catch (error) {}
+    } catch (error) {
+      alert("Login error");
+    } finally {
+      setLogging(false);
+    }
   };
+
   if (loading) {
     return (
       <View style={styles.container}>
@@ -63,7 +73,7 @@ export default function Login() {
         <Card.Content>
           <Text style={styles.title}>Login</Text>
           <Formik
-            initialValues={{ agentId: "abcdea", password: "123456" }}
+            initialValues={{ agentId: "admin_", password: "123456" }}
             validationSchema={loginSchema}
             onSubmit={handleSubmit}
           >
@@ -74,6 +84,7 @@ export default function Login() {
               values,
               errors,
               touched,
+              isSubmitting,
             }) => (
               <>
                 <TextInput
@@ -107,9 +118,11 @@ export default function Login() {
                   mode="contained"
                   onPress={() => handleSubmit()}
                   style={styles.button}
+                  disabled={isSubmitting}
                 >
-                  Submit
+                  {logging ? "Loading..." : "Login"}
                 </Button>
+                <p style={styles.errorText}>{errorMessage}</p>
               </>
             )}
           </Formik>
@@ -148,5 +161,6 @@ const styles = StyleSheet.create({
     color: "red",
     fontSize: 12,
     marginBottom: 10,
+    textAlign: "center",
   },
 });

@@ -1,10 +1,11 @@
 import { checkLogin } from "@/Api/auth.api";
 import { setAuthToken } from "@/axios/axiosInstance";
 import { socketURL } from "@/axios/urls";
+import { RootStackParamList } from "@/Types/rootStackParams";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { StackActions } from "@react-navigation/native";
-import { useNavigation } from "expo-router";
+import { StackActions, useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
@@ -30,7 +31,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   // Initialize socket when user is authenticated
   useEffect(() => {
@@ -93,11 +94,10 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const { success, data } = await checkLogin();
           if (success && data) {
             setUser(data);
+            navigation.navigate("ChatList");
           }
         } else {
-          navigation.dispatch(
-            StackActions.replace("index") // Replace with your login route name
-          );
+          navigation.navigate("Login");
         }
       } catch (error) {
         console.error("Auth error:", error);
@@ -108,6 +108,9 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     loadUser();
   }, []);
+  useEffect(() => {
+    !user && navigation.navigate("Login");
+  }, [user]);
   if (loading) {
     return (
       <View style={styles.container}>

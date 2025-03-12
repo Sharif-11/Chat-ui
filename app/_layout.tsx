@@ -2,10 +2,10 @@ import { AuthProvider, useAuth } from "@/Contexts/authContext";
 import { createStackNavigator } from "@react-navigation/stack";
 import React from "react";
 import { Provider as PaperProvider } from "react-native-paper";
-import Agents from "./agents/Agent";
-import ChatList from "./agents/ChatBox";
-import Login from "./agents/login";
-import Profile from "./agents/profile";
+import Agents from "./Agent";
+import ChatList from "./ChatBox";
+import Login from "./login";
+import Profile from "./profile";
 
 const Stack = createStackNavigator();
 export default function RootLayout() {
@@ -20,11 +20,13 @@ const StackLayout = () => {
   return (
     <PaperProvider>
       <Stack.Navigator initialRouteName={user ? "ChatList" : "Login"}>
-        <Stack.Screen
-          name="Login"
-          component={Login}
-          options={{ headerShown: false }}
-        />
+        {!user && (
+          <Stack.Screen
+            name="Login"
+            component={Login}
+            options={{ headerShown: false }}
+          />
+        )}
         <Stack.Screen
           name="ChatList"
           component={ChatList}

@@ -9,7 +9,7 @@ export const login = async (data: LoginRequest): Promise<LoginResponse> => {
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError) {
-      throw error;
+      return error.response?.data;
     } else {
       throw new Error("An error occurred. Please try again later.");
     }
@@ -22,7 +22,7 @@ export const checkLogin = async (): Promise<LoginResponse> => {
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError) {
-      throw error;
+      return error.response?.data;
     } else {
       throw new Error("An error occurred. Please try again later.");
     }
@@ -36,7 +36,7 @@ export const createAgent = async (
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError) {
-      throw error;
+      return error.response?.data;
     } else {
       throw new Error("An error occurred. Please try again later.");
     }
@@ -48,7 +48,7 @@ export const getAllAgents = async (): Promise<GetAgentsResponse> => {
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError) {
-      throw error;
+      return error.response?.data;
     } else {
       throw new Error("An error occurred. Please try again later.");
     }
@@ -60,7 +60,7 @@ export const logout = async (): Promise<LogoutResponse> => {
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError) {
-      throw error;
+      return error.response?.data;
     } else {
       throw new Error("An error occurred. Please try again later.");
     }

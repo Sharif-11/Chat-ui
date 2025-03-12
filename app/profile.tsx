@@ -5,15 +5,20 @@ import { RootStackParamList } from "@/Types/rootStackParams";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Avatar, Button, Card, Text } from "react-native-paper";
 
 export default function Profile() {
   const { user, setUser } = useAuth();
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
   const handleLogout = async () => {
     try {
+      setLoggingOut(true);
+      setErrorMessage(null);
       const { success, message } = await logout();
       if (success) {
         setUser(null);
@@ -22,9 +27,12 @@ export default function Profile() {
         navigation.navigate("Login");
       } else {
         console.error("Logout error:", message);
+        setErrorMessage(message);
       }
     } catch (error) {
-      console.error("Logout error:", error);
+      alert("Logout Error");
+    } finally {
+      setLoggingOut(false);
     }
   };
 
@@ -44,9 +52,15 @@ export default function Profile() {
         </Card.Content>
       </Card>
 
-      <Button mode="contained" style={styles.button} onPress={handleLogout}>
-        Logout
+      <Button
+        mode="contained"
+        style={styles.button}
+        onPress={handleLogout}
+        disabled={loggingOut}
+      >
+        {loggingOut ? "Loading..." : "Logout"}
       </Button>
+      <p style={styles.errorText}>{errorMessage}</p>
     </View>
   );
 }
@@ -94,5 +108,11 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 20,
     width: "90%",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 12,
+    marginBottom: 10,
+    textAlign: "center",
   },
 });

@@ -29,6 +29,7 @@ const ChatList: React.FC = () => {
     }[]
   >([]);
   const [loading, setLoading] = useState(true);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false); // For three-dot menu
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
@@ -109,6 +110,7 @@ const ChatList: React.FC = () => {
 
   const handleLogout = async () => {
     try {
+      setLoggingOut(true);
       const { success, message } = await logout();
       // alert(JSON.stringify({ success, message }));
       if (success) {
@@ -121,8 +123,13 @@ const ChatList: React.FC = () => {
       }
     } catch (error) {
       console.error("Logout error:", error);
+    } finally {
+      setLoggingOut(false);
     }
   };
+  if (!user) {
+    navigation.navigate("Login");
+  }
 
   return (
     <View style={styles.container}>
@@ -159,7 +166,7 @@ const ChatList: React.FC = () => {
               handleLogout();
               setMenuVisible(false);
             }}
-            title="Logout"
+            title={loggingOut ? "Loading..." : "Logout"}
           />
         </Menu>
       </View>
