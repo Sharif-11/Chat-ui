@@ -13,7 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { ActivityIndicator, Divider } from "react-native-paper";
+import { ActivityIndicator } from "react-native-paper";
 import { io, Socket } from "socket.io-client";
 
 const ChatList: React.FC = () => {
@@ -154,7 +154,12 @@ const ChatList: React.FC = () => {
         {/* Notification Icon */}
         <TouchableOpacity
           style={styles.notificationIconContainer}
-          onPress={() => setNotificationMenuVisible((pre) => !pre)}
+          onPress={() => {
+            setNotificationMenuVisible((pre) => !pre);
+            if (menuVisible) {
+              setMenuVisible(false);
+            }
+          }}
         >
           <Text style={styles.notificationIcon}>🔔</Text>
           {newChatRequests.length > 0 && (
@@ -165,7 +170,14 @@ const ChatList: React.FC = () => {
         </TouchableOpacity>
 
         {/* Three-Dot Menu */}
-        <TouchableOpacity onPress={() => setMenuVisible(true)}>
+        <TouchableOpacity
+          onPress={() => {
+            setMenuVisible((pre) => !pre);
+            if (notificationMenuVisible) {
+              setNotificationMenuVisible(false);
+            }
+          }}
+        >
           <Text style={styles.menuIcon}>⋮</Text>
         </TouchableOpacity>
       </View>
@@ -205,7 +217,7 @@ const ChatList: React.FC = () => {
           >
             <Text>Profile</Text>
           </TouchableOpacity>
-          <Divider />
+
           {user?.role === "admin" && (
             <TouchableOpacity
               style={styles.menuItem}
@@ -344,6 +356,7 @@ const styles = StyleSheet.create({
   },
   menuItem: {
     paddingVertical: 10,
+    paddingHorizontal: 16,
   },
   noRequests: {
     fontSize: 16,
