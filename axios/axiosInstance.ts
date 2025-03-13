@@ -1,7 +1,9 @@
 import axios from "axios";
 
 // Create an Axios instance with a base URL
-export const baseURL = "https://chat-server-0322.onrender.com/";
+// export const baseURL = "https://chat-server-0322.onrender.com/";
+// export const baseURL = "https://magazine-chat-app-api.onrender.com";
+export const baseURL = "http://localhost:3000";
 const api = axios.create({
   baseURL, // Replace with your actual API URL
   headers: {

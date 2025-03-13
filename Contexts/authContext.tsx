@@ -1,6 +1,7 @@
 import { checkLogin } from "@/Api/auth.api";
 import { setAuthToken } from "@/axios/axiosInstance";
 import { socketURL } from "@/axios/urls";
+import { ChatRequest } from "@/Types/chat.types";
 import { RootStackParamList } from "@/Types/rootStackParams";
 import { NewChatRequest } from "@/Types/utils.types";
 
@@ -22,7 +23,8 @@ interface AuthContextType {
   setUser: (user: User | null) => void;
   setSocket: (socket: Socket | null) => void;
   newChatRequests: NewChatRequest[];
-  setNewChatRequests: (newChatRequests: NewChatRequest[]) => void;
+  setNewChatRequests: (newChatRequests: ChatRequest[]) => void;
+  handleAcceptChat: (chatRequest: ChatRequest) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,21 +36,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [newChatRequests, setNewChatRequests] = useState<
-    {
-      userId: string;
-      userName: string;
-    }[]
-  >([
-    {
-      userId: "1",
-      userName: "Kawsar",
-    },
-    {
-      userId: "2",
-      userName: "Ruhan",
-    },
-  ]);
+  const [newChatRequests, setNewChatRequests] = useState<ChatRequest[]>([]);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   // Initialize socket when user is authenticated
@@ -59,7 +47,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (user) {
         try {
           newSocket = io(socketURL, {
-            query: { ...user },
+            query: { ...user, userName: user.name },
             transports: ["websocket"],
           });
 
@@ -71,12 +59,54 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           newSocket.on("disconnect", () => {
             console.log("Socket disconnected");
           });
+          newSocket.emit("agent_join", {
+            userId: user?.userId,
+            userName: user?.name,
+            role: user?.role,
+          });
 
           newSocket.on("notify_agents", (data) => {
             // Handle incoming chat request notification
             console.log("New chat request:", data);
+            setNewChatRequests((prevRequests) => [
+              ...prevRequests,
+              { userId: data.userId, userName: data.userName },
+            ]);
           });
-
+          newSocket.on("chat_already_accepted", ({ userId }) => {
+            setNewChatRequests((prev) =>
+              prev.filter((request) => request.userId !== userId)
+            );
+            alert(
+              `Chat with user ${userId} was already accepted by another agent`
+            );
+          });
+          newSocket.on(
+            "chat_accepted_by_other",
+            ({ userId, userName, agentName }) => {
+              if (
+                newChatRequests.some((request) => request.userId === userId)
+              ) {
+                setNewChatRequests((prev) =>
+                  prev.filter((request) => request.userId !== userId)
+                );
+                alert(`User ${userName} was claimed by agent ${agentName}`);
+              }
+            }
+          );
+          newSocket.on("chat_assigned", ({ userId, userName }) => {
+            navigation.navigate("ChatBox", {
+              userId,
+              userName,
+              agentId: user.userId,
+              agentName: user.name,
+            });
+          });
+          newSocket.on("chat_already_accepted", ({ userName }) => {
+            alert(
+              `Chat with user ${userName} has already been accepted by another agent.`
+            );
+          });
           setSocket(newSocket);
         } catch (error) {
           console.error("Socket connection error:", error);
@@ -133,6 +163,23 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       </View>
     );
   }
+  const handleAcceptChat = ({ userId, userName }: ChatRequest) => {
+    if (!socket || !user?.userId) return;
+
+    // Show pending state immediately
+    setNewChatRequests((prev) => prev.filter((user) => user.userId !== userId));
+
+    socket.emit("accept_chat", {
+      agentId: user.userId,
+      agentName: user.name,
+      userId,
+      userName,
+    });
+    return () => {
+      socket.off("accept_chat");
+    };
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -143,6 +190,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setSocket,
         newChatRequests,
         setNewChatRequests,
+        handleAcceptChat,
       }}
     >
       {children}

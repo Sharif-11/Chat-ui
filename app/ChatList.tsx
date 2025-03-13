@@ -1,4 +1,5 @@
 import { logout } from "@/Api/auth.api";
+import { getChatRequests } from "@/Api/chat.api";
 import { removeAuthToken } from "@/axios/axiosInstance";
 import { useAuth } from "@/Contexts/authContext";
 import { RootStackParamList } from "@/Types/rootStackParams";
@@ -16,10 +17,15 @@ import {
 import { ActivityIndicator } from "react-native-paper";
 
 const ChatList: React.FC = () => {
-  const { user, setUser, socket, newChatRequests, setNewChatRequests } =
-    useAuth();
+  const {
+    user,
+    setUser,
+    newChatRequests,
+    setNewChatRequests,
+    handleAcceptChat,
+  } = useAuth();
 
-  const [chatRequests, setChatRequests] = useState<
+  const [chatLists, setChatLists] = useState<
     {
       userId: string;
       userName: string;
@@ -28,6 +34,7 @@ const ChatList: React.FC = () => {
       lastMessageTime: string;
     }[]
   >([]);
+
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
@@ -36,54 +43,28 @@ const ChatList: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   // Dummy chat requests for testing
-  const dummyChatRequests = [
-    {
-      userId: "1",
-      userName: "John Doe",
-      lastMessage: "Hello, how can I help you?",
-      lastMessageSender: "John Doe",
-      lastMessageTime: "2023-10-25T14:30:00Z",
-    },
-    {
-      userId: "2",
-      userName: "Jane Smith",
-      lastMessage: "Thanks for the support!",
-      lastMessageSender: "Jane Smith",
-      lastMessageTime: "2023-10-24T10:15:00Z",
-    },
-    {
-      userId: "3",
-      userName: "Alice Johnson",
-      lastMessage: "I have a question about my order.",
-      lastMessageSender: "Alice Johnson",
-      lastMessageTime: "2023-10-23T09:45:00Z",
-    },
-    {
-      userId: "4",
-      userName: "Bob Brown",
-      lastMessage: "Can you check the status of my request?",
-      lastMessageSender: "Bob Brown",
-      lastMessageTime: "2023-10-22T16:20:00Z",
-    },
-  ];
+
+  const fetchChatRequests = async () => {
+    try {
+      const { success, message, data } = await getChatRequests();
+      if (success) {
+        // alert(JSON.stringify(data));
+        setNewChatRequests(data!);
+      } else {
+        alert(message);
+      }
+    } catch (error) {
+      alert("Failed to load chat requests");
+    }
+  };
 
   useEffect(() => {
-    // Simulate loading dummy data
-    setChatRequests(dummyChatRequests);
-    setLoading(false);
+    fetchChatRequests();
   }, []);
 
-  const handleChatPress = (userId: string) => {
-    navigation.navigate("ChatBox", { userId });
-  };
-
-  const handleAcceptChat = (userId: string) => {
-    // Handle accepting the chat request
-    // setNewChatRequests((prevRequests) =>
-    //   prevRequests.filter((request) => request.userId !== userId)
-    // );
-    // alert(`Chat with user ${userId} has been accepted.`);
-  };
+  // const handleChatPress = (userId: string) => {
+  //   navigation.navigate("ChatBox", { userId });
+  // };
 
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -161,7 +142,7 @@ const ChatList: React.FC = () => {
                 </Text>
                 <TouchableOpacity
                   style={styles.acceptButton}
-                  onPress={() => handleAcceptChat(request.userId)}
+                  onPress={() => handleAcceptChat(request)}
                 >
                   <Text style={styles.acceptButtonText}>Accept</Text>
                 </TouchableOpacity>
@@ -210,16 +191,16 @@ const ChatList: React.FC = () => {
       {/* Chat List */}
       {loading ? (
         <ActivityIndicator animating size="large" />
-      ) : chatRequests.length === 0 ? (
+      ) : chatLists.length === 0 ? (
         <Text style={styles.noRequests}>No chat requests at the moment.</Text>
       ) : (
         <FlatList
-          data={chatRequests}
+          data={chatLists}
           keyExtractor={(item) => item.userId}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.chatItem}
-              onPress={() => handleChatPress(item.userId)}
+              // onPress={() => handleChatPress(item.userId)}
             >
               <Text style={styles.userName}>{item.userName}</Text>
               <Text style={styles.lastMessage}>

@@ -5,5 +5,8 @@ export type RootStackParamList = {
   ChatList: undefined;
   ChatBox: {
     userId: string;
+    userName: string;
+    agentId: string;
+    agentName: string;
   };
 };

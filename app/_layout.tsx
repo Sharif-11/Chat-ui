@@ -25,9 +25,6 @@ const StackLayout = () => {
   if (loading) {
     return <ActivityIndicator />; // or some other loading component
   }
-  if (user) {
-    alert(JSON.stringify(user));
-  }
   return (
     <PaperProvider>
       <Stack.Navigator initialRouteName={"Login"}>
